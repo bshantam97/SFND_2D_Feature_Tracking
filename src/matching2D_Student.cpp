@@ -58,8 +58,69 @@ void detKeypointsHarris (std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, boo
     }
 }
 
-void detKeypointsModern (std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis = false) {
+void detKeypointsModern (std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis) {
+    if (detectorType.compare("FAST") == 0) {
+        int threshold = 50;
+        bool nms = true;
 
+        cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16;
+        cv::Ptr<cv::FastFeatureDetector> detector  = cv::FastFeatureDetector::create(threshold, nms, type);
+
+        auto startTime = std::chrono::steady_clock::now();
+        detector->detect(img, keypoints);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
+        std::cout << "FAST detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
+    } 
+    else if (detectorType.compare("BRISK") == 0){
+        cv::Ptr<cv::FeatureDetector> detector = cv::BRISK::create();
+        auto startTime = std::chrono::steady_clock::now();
+        detector->detect(img, keypoints);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        std::cout << " BRISK detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
+    }
+    else if (detectorType.compare("SIFT") == 0) {
+        cv::Ptr<cv::SiftFeatureDetector> detector = cv::SIFT::create();
+        auto startTime = std::chrono::steady_clock::now();
+        detector->detect(img, keypoints);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        std::cout << " SIFT detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
+    }
+    else if (detectorType.compare("ORB") == 0) {
+        cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
+        auto startTime = std::chrono::steady_clock::now();
+        detector->detect(img, keypoints);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        std::cout << " ORB detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
+    }
+    else if (detectorType.compare("AKAZE") == 0) {
+        cv::Ptr<cv::FeatureDetector> detector = cv::AKAZE::create();
+        auto startTime = std::chrono::steady_clock::now();
+        detector->detect(img, keypoints);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        std::cout << " AKAZE detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
+    }
+    else if (detectorType.compare("FREAK") == 0) {
+        cv::Ptr<cv::FeatureDetector> detector = cv::xfeatures2d::FREAK::create();
+        auto startTime = std::chrono::steady_clock::now();
+        detector->detect(img, keypoints);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+        std::cout << " FREAK detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
+    }
+
+    if (bVis) {
+        cv::Mat visImage = img.clone();
+        cv::drawKeypoints(img, keypoints, visImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+        std::string windowName1 = detectorType + "Results";
+        cv::namedWindow(windowName1, 1);
+        cv::imshow(windowName1, visImage);
+        cv::waitKey(0);
+    }
 }
 
 // Find best matches for keypoints in two camera images based on several matching methods
@@ -69,7 +130,6 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
     // configure matcher
     bool crossCheck = false;
     cv::Ptr<cv::DescriptorMatcher> matcher;
-
     if (matcherType.compare("MAT_BF") == 0)
     {
         int normType = cv::NORM_HAMMING;
@@ -96,28 +156,57 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
 // Use one of several types of state-of-art descriptors to uniquely identify keypoints
 void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &descriptors, std::string descriptorType)
 {
-    // select appropriate descriptor
-    cv::Ptr<cv::DescriptorExtractor> extractor;
     if (descriptorType.compare("BRISK") == 0)
     {
 
         int threshold = 30;        // FAST/AGAST detection threshold score.
         int octaves = 3;           // detection octaves (use 0 to do single scale)
         float patternScale = 1.0f; // apply this scale to the pattern used for sampling the neighbourhood of a keypoint.
-
-        extractor = cv::BRISK::create(threshold, octaves, patternScale);
+        // select appropriate descriptor
+        
+        cv::Ptr<cv::DescriptorExtractor> extractor = cv::BRISK::create(threshold, octaves, patternScale);
+        // perform feature description
+        auto startTime = std::chrono::steady_clock::now();
+        extractor->compute(img, keypoints, descriptors);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
+        std::cout << descriptorType << " descriptor extraction in " << elapsedTime.count() << " ms" << std::endl;
     }
-    else
-    {
-
-        //...
+    else if (descriptorType.compare("SIFT") == 0) {
+        cv::Ptr<cv::DescriptorExtractor> extractor = cv::SIFT::create();
+        auto startTime = std::chrono::steady_clock::now();
+        extractor->compute(img, keypoints, descriptors);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
+        std::cout << descriptorType << " descriptor extraction in " << elapsedTime.count() << " ms" << std::endl;
+    } 
+    else if (descriptorType.compare("ORB") == 0) {
+        cv::Ptr<cv::DescriptorExtractor> extractor = cv::ORB::create();
+        auto startTime = std::chrono::steady_clock::now();
+        extractor->compute(img, keypoints, descriptors);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
+        std::cout << descriptorType << " descriptor extraction in " << elapsedTime.count() << " ms" << std::endl;
     }
-
-    // perform feature description
-    double t = (double)cv::getTickCount();
-    extractor->compute(img, keypoints, descriptors);
-    t = ((double)cv::getTickCount() - t) / cv::getTickFrequency();
-    std::cout << descriptorType << " descriptor extraction in " << 1000 * t / 1.0 << " ms" << std::endl;
+    else if (descriptorType.compare("BRIEF") == 0) {
+        cv::Ptr<cv::xfeatures2d::BriefDescriptorExtractor> extractor = cv::xfeatures2d::BriefDescriptorExtractor::create();
+        auto startTime = std::chrono::steady_clock::now();
+        extractor->compute(img, keypoints, descriptors);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
+        std::cout << descriptorType << " descriptor extraction in " << elapsedTime.count() << " ms " << std::endl;
+    } 
+    else if (descriptorType.compare("FREAK") == 0) {
+        cv::Ptr<cv::DescriptorExtractor> extractor = cv::xfeatures2d::FREAK::create();
+        auto startTime = std::chrono::steady_clock::now();
+        extractor->compute(img, keypoints, descriptors);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
+        std::cout << descriptorType << " descriptor extraction in " << elapsedTime.count() << " ms " << std::endl;
+    } 
+    else if (descriptorType.compare("AKAZE") == 0) {
+        cv::Ptr<cv::DescriptorExtractor> extractor = cv::AKAZE::create();
+    }
 }
 
 // Detect keypoints in image using the traditional Shi-Thomasi detector

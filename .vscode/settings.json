@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "sstream": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "iomanip": "cpp",
+        "chrono": "cpp",
+        "*.tcc": "cpp",
+        "string_view": "cpp"
     }
 }
