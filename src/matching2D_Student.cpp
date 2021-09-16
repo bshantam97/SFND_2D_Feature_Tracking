@@ -130,26 +130,55 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
     // configure matcher
     bool crossCheck = false;
     cv::Ptr<cv::DescriptorMatcher> matcher;
+    cv::Ptr<cv::FlannBasedMatcher> flannMatcher;
     if (matcherType.compare("MAT_BF") == 0)
     {
-        int normType = cv::NORM_HAMMING;
+        int normType = descriptorType.compare("DES_BINARY") == 0 ? cv::NORM_HAMMING : cv::NORM_L2;
         matcher = cv::BFMatcher::create(normType, crossCheck);
     }
     else if (matcherType.compare("MAT_FLANN") == 0)
     {
-        // ...
+        // Convert binary descriptors to floating point due to bug in OpenCV
+        if (descSource.type() != CV_32F) {
+            descSource.convertTo(descSource, CV_32F);
+        }
+        if (descRef.type() != CV_32F) {
+            descRef.convertTo(descRef, CV_32F);
+        }
+        flannMatcher = cv::FlannBasedMatcher::create();
+        std::cout << "FLANN Based Matching";
     }
 
     // perform matching task
     if (selectorType.compare("SEL_NN") == 0)
     { // nearest neighbor (best match)
-
-        matcher->match(descSource, descRef, matches); // Finds the best match for each descriptor in desc1
+        auto startTime = std::chrono::steady_clock::now();
+        if (matcherType.compare("MAT_BF") == 0)
+            matcher->match(descSource, descRef, matches); // Finds the best match for each descriptor in desc1
+        else 
+            flannMatcher->match(descSource, descRef, matches);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
+        std::cout << " NN with " << matches.size() << " matches " << " in " << elapsedTime.count() << " ms " << std::endl;
     }
     else if (selectorType.compare("SEL_KNN") == 0)
     { // k nearest neighbors (k=2)
+        std::vector<std::vector<cv::DMatch>> knnMatches;
+        auto startTime = std::chrono::steady_clock::now();
+        if (matcherType.compare("MAT_BF") == 0)
+            matcher->knnMatch(descSource, descRef, knnMatches, 2); // Finds the best match for each descriptor in desc1
+        else 
+            flannMatcher->knnMatch(descSource, descRef, knnMatches, 2);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
 
-        // ...
+        const double threshold = 0.7;
+        for (size_t i = 0; i != knnMatches.size(); i++) {
+            if (knnMatches[i][0].distance < threshold * knnMatches[i][1].distance) {
+                matches.push_back(knnMatches[i][0]);
+            }
+        }
+        std::cout << " Removed matches after nearest neighbor ratio " << knnMatches.size() - matches.size() << std::endl;
     }
 }
 
@@ -206,6 +235,11 @@ void descKeypoints(std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, cv::Mat &
     } 
     else if (descriptorType.compare("AKAZE") == 0) {
         cv::Ptr<cv::DescriptorExtractor> extractor = cv::AKAZE::create();
+        auto startTime = std::chrono::steady_clock::now();
+        extractor->compute(img, keypoints, descriptors);
+        auto endTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
+        std::cout << descriptorType << " descriptor extraction in " << elapsedTime.count() << " ms " << std::endl;
     }
 }
 
