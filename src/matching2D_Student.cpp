@@ -104,15 +104,6 @@ void detKeypointsModern (std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
         std::cout << " AKAZE detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
     }
-    else if (detectorType.compare("FREAK") == 0) {
-        cv::Ptr<cv::FeatureDetector> detector = cv::xfeatures2d::FREAK::create();
-        auto startTime = std::chrono::steady_clock::now();
-        detector->detect(img, keypoints);
-        auto endTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        std::cout << " FREAK detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
-    }
-
     if (bVis) {
         cv::Mat visImage = img.clone();
         cv::drawKeypoints(img, keypoints, visImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);

@@ -81,7 +81,7 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         std::vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        std::string detectorType = "SHITOMASI";
+        std::string detectorType = "SIFT";
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
@@ -115,9 +115,6 @@ int main(int argc, const char *argv[])
         else if (detectorType.compare("SIFT") == 0) {
             detKeypointsModern(keypoints, imgGray, detectorType, false);
         } 
-        else if (detectorType.compare("FREAK") == 0) {
-            detKeypointsModern(keypoints, imgGray, detectorType, false);
-        }
         //// EOF STUDENT ASSIGNMENT
 
         //// STUDENT ASSIGNMENT
@@ -166,7 +163,7 @@ int main(int argc, const char *argv[])
         //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
         cv::Mat descriptors;
-        std::string descriptorType = "SIFT"; // BRIEF, ORB, FREAK, AKAZE, SIFT
+        std::string descriptorType = "BRIEF"; // BRIEF, ORB, FREAK, AKAZE, SIFT
         descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
         //// EOF STUDENT ASSIGNMENT
 
@@ -181,8 +178,8 @@ int main(int argc, const char *argv[])
             /* MATCH KEYPOINT DESCRIPTORS */
 
             std::vector<cv::DMatch> matches;
-            std::string matcherType = "MAT_FLANN";        // MAT_BF, MAT_FLANN
-            std::string descriptorType = "DES_HOG"; // DES_BINARY, DES_HOG
+            std::string matcherType = "MAT_BF";        // MAT_BF, MAT_FLANN
+            std::string descriptorType = "DES_BINARY"; // DES_BINARY, DES_HOG
             std::string selectorType = "SEL_KNN";       // SEL_NN, SEL_KNN
 
             //// STUDENT ASSIGNMENT
@@ -198,7 +195,7 @@ int main(int argc, const char *argv[])
             // store matches in current data frame
             (dataBuffer.end() - 1)->kptMatches = matches;
 
-            std::cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << std::endl;
+            std::cout << "#4 : MATCH KEYPOINT DESCRIPTORS done "  << " ---------> MATCHES " << matches.size() <<  std::endl;
 
             // visualize matches between current and previous image
             bVis = true;
