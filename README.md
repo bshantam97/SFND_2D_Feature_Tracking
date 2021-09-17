@@ -71,7 +71,8 @@ Using the K-Nearest-Neighbor matching to implement the descriptor distance ratio
 
 After looking at the above performance evaluations I have listed the top 3 detector-descriptor combinations for keypoint detection and matching between vehicles
 1. FAST Detector with BRIEF Descriptor
-2. 
+2. FAST Detector with BRISK Descriptor
+3. 
 ## Dependencies for Running Locally
 1. cmake >= 2.8
  * All OSes: [click here for installation instructions](https://cmake.org/install/)
