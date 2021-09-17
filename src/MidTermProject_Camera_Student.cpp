@@ -87,28 +87,19 @@ int main(int argc, const char *argv[])
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
         //// -> HARRIS (Working), FAST (Working), BRISK (Working), ORB (Working), AKAZE (Working), SIFT (Working), FREAK (Not Working)
 
-        if (detectorType == "SHITOMASI")
-
-            detKeypointsShiTomasi(keypoints, imgGray, false);
+        if (detectorType == "SHITOMASI") detKeypointsShiTomasi(keypoints, imgGray, false);
         
-        if (detectorType == "HARRIS") 
-            detKeypointsHarris(keypoints, imgGray, false);
+        if (detectorType == "HARRIS") detKeypointsHarris(keypoints, imgGray, false);
         
-        if (detectorType == "FAST") 
-            detKeypointsModern(keypoints, imgGray, detectorType, false); 
+        if (detectorType == "FAST") detKeypointsModern(keypoints, imgGray, detectorType, false); 
         
-        if (detectorType == "BRISK")
-            detKeypointsModern(keypoints, imgGray, detectorType, false);
+        if (detectorType == "BRISK") detKeypointsModern(keypoints, imgGray, detectorType, false);
         
-        if (detectorType == "ORB")
-            detKeypointsModern(keypoints, imgGray, detectorType, false); 
+        if (detectorType == "ORB") detKeypointsModern(keypoints, imgGray, detectorType, false); 
         
-        if (detectorType == "AKAZE")
-            detKeypointsModern(keypoints, imgGray, detectorType, false);
+        if (detectorType == "AKAZE") detKeypointsModern(keypoints, imgGray, detectorType, false);
         
-        if (detectorType == "SIFT" ) {
-            detKeypointsModern(keypoints, imgGray, detectorType, false);
-        } 
+        if (detectorType == "SIFT" ) detKeypointsModern(keypoints, imgGray, detectorType, false);
         //// EOF STUDENT ASSIGNMENT
 
         //// STUDENT ASSIGNMENT

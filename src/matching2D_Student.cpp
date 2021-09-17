@@ -70,6 +70,8 @@ void detKeypointsModern (std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std
 
         FastDetector  = cv::FastFeatureDetector::create(threshold, nms, type);
     }
+
+    // The create methods
     if (detectorType == "BRISK") detector = cv::BRISK::create();
 
     if (detectorType == "SIFT") siftDetector = cv::SIFT::create();
@@ -77,7 +79,8 @@ void detKeypointsModern (std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std
     if (detectorType == "ORB") detector = cv::ORB::create();
 
     if (detectorType == "AKAZE") detector = cv::AKAZE::create();
-        
+    
+    // The Detect methods
     auto startTime = std::chrono::steady_clock::now();
     
     if (detectorType == "SIFT") siftDetector->detect(img, keypoints);
@@ -150,10 +153,8 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
 
         const double threshold = 0.7;
-        for (size_t i = 0; i != knnMatches.size(); i++) {
-            if (knnMatches[i][0].distance < threshold * knnMatches[i][1].distance) {
-                matches.push_back(knnMatches[i][0]);
-            }
+        for (auto x : knnMatches) {
+            if (x[0].distance < threshold * x[1].distance) matches.push_back(x[0]);
         }
         std::cout << " Removed matches after nearest neighbor ratio " << knnMatches.size() - matches.size() << std::endl;
     }
