@@ -11,6 +11,63 @@ The idea of the camera course is to build a collision detection system - that's 
 
 See the classroom instruction and code comments for more details on each of these parts. Once you are finished with this project, the keypoint matching part will be set up and you can proceed to the next lesson, where the focus is on integrating Lidar points and on object detection using deep-learning. 
 
+# Performance Evaluations and Description of each part of the project 
+
+## MP.1 Data Buffer Optimization
+Now for this project a ring buffer has been implemented. The idea behind the ring buffer implementation is that at anytime there should not be more than 2 images in the databuffer. Hence when an image is pushed back into the data buffer vector and if the size is greater than 2 the image at the initial position of the vector is removed.
+
+## MP.2 Keypoint Detection
+In this project a variety of keypoint detecetors have been implemented using OpenCV. The keypoint detectors that have been implemented are SHI-TOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT and FREAK.
+
+## MP.3 Keypoint Removal
+We are only concerned with the keypoints that have been detected on the vehicle. The keypoints describe a coordinate of interest like a corner or an edge which is then used to by the descriptors to define a local region of interest around the keypoint. The keypoints that were outside the defined box region were discarded and only the ones inside the box region containing the car were kept.
+
+## MP.4 Keypoint Descriptors
+A variety of keypoint descriptors were implemented like BRISK, SIFT, ORB, BRIEF and FREAK. All these descriptors were used in combination with the keypoint detectors to select the best performing system for 2d tracking.
+
+## MP.5 Descriptor Matching
+Once we have detected descriptors of all the images we need to perform descriptor matching. This can be done using Brute Force matching in which for each descriptor in the source image we compare and match it with all the descriptors in the reference image with and without **cross check matching**. Th other approach and a much faster approach is to use FLANN based matching which has also been implemented. Then either using **Nearest Neighbors** we find the best descriptor matches or using **K-Nearest neighbors** we find the k-best descriptor matches and then based on the **Distance Ratio Test" refine our descriptor matches.
+
+## MP.6 Descriptor Ratio Test
+Using the K-Nearest-Neighbor matching to implement the descriptor distance ratio test, which looks at the ratio of best vs. second-best match to decide whether to keep an associated pair of keypoints.
+
+## MP.7 Performance Evaluation 1 (Number of Keypoints Detected)
+
+| Keypoint Detector | Image 1 | Image 2 | Image 3 | Image 4 | Image 5 | Image 6 | Image 7 | Image 8 | Image 9 | Image 10 | Neighborhood size |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| SHI-TOMASI | 127 | 120 | 123 | 120 | 120 | 115 | 114 | 125 | 112 | 113 | 128x50 | 
+| HARRIS | 20 | 17 | 21 | 21 | 35 | 25 | 20 | N/A | N/A | N/A | 128x35 |
+| FAST | 95 | 95 | 93 | 98 | 98 | 99 | 90 | 92 | 101 | 95 | 128x50 |
+| BRISK | 254 | 274 | 276 | 275 | 293 | 275 | 289 | 268 | 260 | 250 | 128x50 |
+| ORB | 91 | 102 | 106 | 113 | 109 | 124 | 129 | 127 | 124 | 125 | 128x50 |
+| AKAZE | 162 | 157 | 159 | 154 | 162 | 163 | 173 | 175 | 175 | 175 | 128x50 |
+| SIFT | 137 | 131 | 121 | 135 | 134 | 139 | 136 | 147 | 156 | 135 | 128x51 |
+
+## MP.8 Performance Evaluation 2 (Number of matched keypoints between a set of images)
+
+| Keypoint Detector/Descriptor | BRISK | SIFT | ORB | BRIEF | FREAK | AKAZE |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- | 
+| SHI-TOMASI | 349 | 406 | 385 | 401 | 299 | N/A |
+| HARRIS | 10 | 70 | 31 | 53 | 22 | N/A |
+| FAST | 303 | 339 | 362 | 369 | 289 | N/A |
+| BRISK | 274 | 278 | 260 | 281 | 280 | N/A |
+| ORB | 312 | 298 | 299 | 217 | 221 | N/A |
+| AKAZE | N/A | N/A | N/A | N/A | N/A | 342 |
+| SIFT | 159 | 297 | N/A | 203 | 174 | N/A |
+
+## MP.9 Performance Evaluation 3 (Upper limit Time for Keypoint Detection and description extraction)
+
+| Keypoint Detector/Descriptor | BRISK | SIFT | ORB | BRIEF | FREAK | AKAZE |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- | 
+| SHI-TOMASI | 22.5156ms | 33ms | 20.5ms | 17ms | 46ms | N/A |
+| HARRIS | N/A | N/A | N/A | N/A | N/A | N/A |
+| FAST | 1ms | 20ms  | 6ms | 3ms | 36ms | N/A |
+| BRISK | 55ms | 78ms | 130ms | 66ms | 92ms | N/A |
+| ORB | 10ms | 49ms | 26ms | 9ms | 49ms | N/A |
+| AKAZE | N/A | N/A | N/A | N/A | N/A | 212ms |
+| SIFT | 114ms | 207ms | N/A | 104ms | 162ms | N/A |
+
+
 ## Dependencies for Running Locally
 1. cmake >= 2.8
  * All OSes: [click here for installation instructions](https://cmake.org/install/)
