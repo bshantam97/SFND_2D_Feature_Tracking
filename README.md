@@ -69,7 +69,9 @@ Using the K-Nearest-Neighbor matching to implement the descriptor distance ratio
 | AKAZE | N/A | N/A | N/A | N/A | N/A | 212ms |
 | SIFT | 114ms | 207ms | N/A | 104ms | 162ms | N/A |
 
-
+After looking at the above performance evaluations I have listed the top 3 detector-descriptor combinations for keypoint detection and matching between vehicles
+1. FAST Detector with BRIEF Descriptor
+2. 
 ## Dependencies for Running Locally
 1. cmake >= 2.8
  * All OSes: [click here for installation instructions](https://cmake.org/install/)
