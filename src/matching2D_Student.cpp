@@ -59,51 +59,37 @@ void detKeypointsHarris (std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, boo
 }
 
 void detKeypointsModern (std::vector<cv::KeyPoint> &keypoints, cv::Mat &img, std::string detectorType, bool bVis) {
-    if (detectorType.compare("FAST") == 0) {
+    cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16;
+    cv::Ptr<cv::FastFeatureDetector> FastDetector;
+    cv::Ptr<cv::FeatureDetector> detector;
+    cv::Ptr<cv::SiftFeatureDetector> siftDetector;
+
+    if (detectorType == "FAST") {
         int threshold = 50;
         bool nms = true;
 
-        cv::FastFeatureDetector::DetectorType type = cv::FastFeatureDetector::TYPE_9_16;
-        cv::Ptr<cv::FastFeatureDetector> detector  = cv::FastFeatureDetector::create(threshold, nms, type);
+        FastDetector  = cv::FastFeatureDetector::create(threshold, nms, type);
+    }
+    if (detectorType == "BRISK") detector = cv::BRISK::create();
 
-        auto startTime = std::chrono::steady_clock::now();
-        detector->detect(img, keypoints);
-        auto endTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
-        std::cout << "FAST detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
-    } 
-    else if (detectorType.compare("BRISK") == 0){
-        cv::Ptr<cv::FeatureDetector> detector = cv::BRISK::create();
-        auto startTime = std::chrono::steady_clock::now();
-        detector->detect(img, keypoints);
-        auto endTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        std::cout << " BRISK detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
-    }
-    else if (detectorType.compare("SIFT") == 0) {
-        cv::Ptr<cv::SiftFeatureDetector> detector = cv::SIFT::create();
-        auto startTime = std::chrono::steady_clock::now();
-        detector->detect(img, keypoints);
-        auto endTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        std::cout << " SIFT detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
-    }
-    else if (detectorType.compare("ORB") == 0) {
-        cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create();
-        auto startTime = std::chrono::steady_clock::now();
-        detector->detect(img, keypoints);
-        auto endTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        std::cout << " ORB detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
-    }
-    else if (detectorType.compare("AKAZE") == 0) {
-        cv::Ptr<cv::FeatureDetector> detector = cv::AKAZE::create();
-        auto startTime = std::chrono::steady_clock::now();
-        detector->detect(img, keypoints);
-        auto endTime = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-        std::cout << " AKAZE detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl;
-    }
+    if (detectorType == "SIFT") siftDetector = cv::SIFT::create();
+
+    if (detectorType == "ORB") detector = cv::ORB::create();
+
+    if (detectorType == "AKAZE") detector = cv::AKAZE::create();
+        
+    auto startTime = std::chrono::steady_clock::now();
+    
+    if (detectorType == "SIFT") siftDetector->detect(img, keypoints);
+    
+    if (detectorType == "BRISK" || detectorType == "ORB" || detectorType == "AKAZE") detector->detect(img, keypoints);
+    
+    if (detectorType == "FAST") FastDetector->detect(img, keypoints);
+    
+    auto endTime = std::chrono::steady_clock::now();
+    auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
+    std::cout << detectorType <<" Detected " << keypoints.size() << " keypoints in " << elapsedTime.count() << " ms " << std::endl; 
+
     if (bVis) {
         cv::Mat visImage = img.clone();
         cv::drawKeypoints(img, keypoints, visImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
@@ -122,12 +108,12 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
     bool crossCheck = false;
     cv::Ptr<cv::DescriptorMatcher> matcher;
     cv::Ptr<cv::FlannBasedMatcher> flannMatcher;
-    if (matcherType.compare("MAT_BF") == 0)
+    if (matcherType == "MAT_BF")
     {
         int normType = descriptorType.compare("DES_BINARY") == 0 ? cv::NORM_HAMMING : cv::NORM_L2;
         matcher = cv::BFMatcher::create(normType, crossCheck);
     }
-    else if (matcherType.compare("MAT_FLANN") == 0)
+    if (matcherType == "MAT_FLANN")
     {
         // Convert binary descriptors to floating point due to bug in OpenCV
         if (descSource.type() != CV_32F) {
@@ -141,7 +127,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
     }
 
     // perform matching task
-    if (selectorType.compare("SEL_NN") == 0)
+    if (selectorType == "SEL_NN")
     { // nearest neighbor (best match)
         auto startTime = std::chrono::steady_clock::now();
         if (matcherType.compare("MAT_BF") == 0)
@@ -152,7 +138,7 @@ void matchDescriptors(std::vector<cv::KeyPoint> &kPtsSource, std::vector<cv::Key
         auto elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime-startTime);
         std::cout << " NN with " << matches.size() << " matches " << " in " << elapsedTime.count() << " ms " << std::endl;
     }
-    else if (selectorType.compare("SEL_KNN") == 0)
+    if (selectorType == "SEL_KNN")
     { // k nearest neighbors (k=2)
         std::vector<std::vector<cv::DMatch>> knnMatches;
         auto startTime = std::chrono::steady_clock::now();

@@ -81,38 +81,32 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         std::vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        std::string detectorType = "SIFT";
+        std::string detectorType = "FAST";
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
         //// -> HARRIS (Working), FAST (Working), BRISK (Working), ORB (Working), AKAZE (Working), SIFT (Working), FREAK (Not Working)
 
-        if (detectorType.compare("SHITOMASI") == 0)
-        {
+        if (detectorType == "SHITOMASI")
+
             detKeypointsShiTomasi(keypoints, imgGray, false);
-        } 
         
-        else if (detectorType.compare("HARRIS") == 0) {
+        if (detectorType == "HARRIS") 
             detKeypointsHarris(keypoints, imgGray, false);
-        } 
         
-        else if (detectorType.compare("FAST") == 0) {
+        if (detectorType == "FAST") 
+            detKeypointsModern(keypoints, imgGray, detectorType, false); 
+        
+        if (detectorType == "BRISK")
             detKeypointsModern(keypoints, imgGray, detectorType, false);
-        } 
         
-        else if (detectorType.compare("BRISK") == 0) {
+        if (detectorType == "ORB")
+            detKeypointsModern(keypoints, imgGray, detectorType, false); 
+        
+        if (detectorType == "AKAZE")
             detKeypointsModern(keypoints, imgGray, detectorType, false);
-        } 
         
-        else if (detectorType.compare("ORB") == 0) {
-            detKeypointsModern(keypoints, imgGray, detectorType, false);
-        } 
-        
-        else if (detectorType.compare("AKAZE") == 0) {
-            detKeypointsModern(keypoints, imgGray, detectorType, false);
-        } 
-        
-        else if (detectorType.compare("SIFT") == 0) {
+        if (detectorType == "SIFT" ) {
             detKeypointsModern(keypoints, imgGray, detectorType, false);
         } 
         //// EOF STUDENT ASSIGNMENT
